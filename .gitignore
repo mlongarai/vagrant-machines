@@ -1,0 +1,8 @@
+*.log
+*.vagrant
+.vagrant
+/.vagrant
+*.DS_Store
+.DS_Store
+DS_Store
+**/.DS_Store
