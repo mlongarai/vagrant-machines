@@ -43,7 +43,7 @@ Vagrant.configure(2) do |config|
 
  # Since we use this for testing purposes only, simply provision the pubkey from
  # the user's home directory too root / ubuntu users in the VM.
- ssh_pub_key = File.readlines("#{Dir.home}/.ssh/id_rsa.pub").first.strip
+ ssh_pub_key = File.readlines("#{Dir.home}/.ssh/work.pub").first.strip
  config.vm.provision "shell", inline: <<-SHELL
    sudo sed -i 's/without-password/yes/g' /etc/ssh/sshd_config
    sudo service ssh restart

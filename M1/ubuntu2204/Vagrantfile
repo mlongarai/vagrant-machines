@@ -1,0 +1,29 @@
+# https://github.com/ppggff/vagrant-qemu
+Vagrant.configure("2") do |config|
+  
+  config.vm.box = "generic/ubuntu2204"
+
+  config.vm.provider "qemu" do |qe|
+    qe.arch = "x86_64"
+    qe.machine = "q35"
+    qe.cpu = "max"
+    qe.net_device = "virtio-net-pci"
+    qe.ssh_port = 2223
+  end
+
+  username = ENV["ansible"]
+  (1..1).each do |i|
+    config.vm.define "local_linux-0#{i}" do |node|
+      node.vm.network "private_network", ip: "33.33.34.3#{i}"
+      node.vm.hostname = "local-linux-0#{i}"
+    end
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo apt-get -y install python3 git
+    sudo sed -i 's/without-password/yes/g' /etc/ssh/sshd_config
+    sudo sed -i /etc/sudoers -re 's/^root.*/root ALL=(ALL:ALL) NOPASSWD: ALL/g'
+    echo "vagrant ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+    sudo systemctl restart ssh.service
+  SHELL
+end
