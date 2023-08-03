@@ -9,6 +9,7 @@ Vagrant.configure("2") do |config|
     qe.cpu = "max"
     qe.net_device = "virtio-net-pci"
     qe.ssh_port = 2222
+    qe.extra_netdev_args = "net=33.33.33.0/24,dhcpstart=33.33.33.0"
   end
 
   username = ENV["ansible"]
