@@ -27,6 +27,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: <<-SHELL
     sed -i 's/gpgcheck=1/gpgcheck=0/g' /etc/yum.repos.d/*
     yum -y install python3 git
+    yum -y install net-tools
     sudo sed -i 's/without-password/yes/g' /etc/ssh/sshd_config
     sudo sed -i /etc/sudoers -re 's/^root.*/root ALL=(ALL:ALL) NOPASSWD: ALL/g'
     echo "vagrant ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
