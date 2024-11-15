@@ -1,16 +1,20 @@
-# https://github.com/ppggff/vagrant-qemu
 Vagrant.configure("2") do |config|
   
   config.vm.box = "generic/ubuntu2204"
 
   config.vm.provider "qemu" do |qe|
+    # Specify the architecture, machine type, and CPU settings
     qe.arch = "x86_64"
     qe.machine = "q35"
     qe.cpu = "max"
     qe.net_device = "virtio-net-pci"
-    qe.ssh_port = 2223
+    
+    # Set up SSH and networking configuration
+    qe.ssh_port = 2222
+    qe.extra_netdev_args = "net=33.33.33.0/24,dhcpstart=33.33.33.0"
   end
 
+  # Define the virtual machines and network settings
   username = ENV["ansible"]
   (1..1).each do |i|
     config.vm.define "local_linux-0#{i}" do |node|
@@ -19,11 +23,19 @@ Vagrant.configure("2") do |config|
     end
   end
 
+  # Set up SSH keys for Vagrant and root user
+  ssh_pub_key = File.readlines("#{Dir.home}/.ssh/murilo.longarai@gmail.com.pub").first.strip
+  config.vm.provision 'shell', inline: 'mkdir -p /root/.ssh'
+  config.vm.provision 'shell', inline: "echo #{ssh_pub_key} >> /root/.ssh/authorized_keys"
+  config.vm.provision 'shell', inline: "echo #{ssh_pub_key} >> /home/vagrant/.ssh/authorized_keys", privileged: false
+
+  # Install additional packages and adjust SSH and sudoers settings
   config.vm.provision "shell", inline: <<-SHELL
-    sudo apt-get -y install python3 git
+    apt-get -y install python3 git
+    apt-get -y install net-tools
     sudo sed -i 's/without-password/yes/g' /etc/ssh/sshd_config
     sudo sed -i /etc/sudoers -re 's/^root.*/root ALL=(ALL:ALL) NOPASSWD: ALL/g'
     echo "vagrant ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-    sudo systemctl restart ssh.service
+    sudo systemctl restart sshd
   SHELL
 end
