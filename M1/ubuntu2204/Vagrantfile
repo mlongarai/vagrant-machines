@@ -20,6 +20,9 @@ Vagrant.configure("2") do |config|
     config.vm.define "local_linux-0#{i}" do |node|
       node.vm.network "private_network", ip: "33.33.34.3#{i}"
       node.vm.hostname = "local-linux-0#{i}"
+      
+      # Forward port 8080 from guest to host
+      node.vm.network "forwarded_port", guest: 8080, host: 8080
     end
   end
 
