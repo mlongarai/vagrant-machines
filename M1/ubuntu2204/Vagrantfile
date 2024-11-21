@@ -18,11 +18,9 @@ Vagrant.configure("2") do |config|
   username = ENV["ansible"]
   (1..1).each do |i|
     config.vm.define "local_linux-0#{i}" do |node|
-      node.vm.network "private_network", ip: "33.33.34.3#{i}"
-      node.vm.hostname = "local-linux-0#{i}"
-      
-      # Forward port 8080 from guest to host
-      node.vm.network "forwarded_port", guest: 8080, host: 8080
+    node.vm.network "forwarded_port", guest: 8080, host: 8080
+    node.vm.network "private_network", ip: "33.33.34.3#{i}"
+    node.vm.hostname = "local-linux-0#{i}"
     end
   end
 
@@ -34,11 +32,14 @@ Vagrant.configure("2") do |config|
 
   # Install additional packages and adjust SSH and sudoers settings
   config.vm.provision "shell", inline: <<-SHELL
-    apt-get -y install python3 git
-    apt-get -y install net-tools
+    sudo apt-get -y update  
+    sudo apt-get -y install software-properties-common 
+    sudo apt-get -y install python3 git
+    sudo apt-get -y install podman
+    sudo apt-get -y install net-tools
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
     echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-    sudo apt-get -y update && sudo apt-get -y install google-cloud-cli
+    sudo apt-get -y install google-cloud-cli
     sudo sed -i 's/without-password/yes/g' /etc/ssh/sshd_config
     sudo sed -i /etc/sudoers -re 's/^root.*/root ALL=(ALL:ALL) NOPASSWD: ALL/g'
     echo "vagrant ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
